@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: spotify-encora-frontend
     ports:
-      - "8080:3000"
+      - "8080:8080"
     networks:
       - app-network
     environment:
@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile
     container_name: spotify-encora-api
     ports:
-      - "3000:8080"
+      - "3000:3000"
     networks:
       - app-network
 
