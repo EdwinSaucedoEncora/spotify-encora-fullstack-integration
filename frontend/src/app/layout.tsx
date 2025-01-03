@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import StoreProvider from "./StoreProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,10 +19,7 @@ export const metadata: Metadata = {
   description: "Spotify Integration on a Full Stack Project",
 };
 
-
-const mainContainerClassDefaults = cn(
-  "w-screen h-screen "
-)
+const mainContainerClassDefaults = cn("w-screen h-screen ");
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,11 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased ${mainContainerClassDefaults}`}
-      >
-        {children}
-      </body>
+      <StoreProvider>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased ${mainContainerClassDefaults}`}
+        >
+          {children}
+        </body>
+      </StoreProvider>
     </html>
   );
 }
