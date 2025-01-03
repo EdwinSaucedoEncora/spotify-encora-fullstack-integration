@@ -7,7 +7,7 @@ COPY settings.gradle /app
 
 ENV GRADLE_USER_HOME=/tmp/gradle
 RUN mkdir -p /tmp/gradle && chmod -r /tmp/gradle
-RUN gradle clean build --no-daemon
+RUN gradle clean build --no-daemon --stacktrace
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
