@@ -5,6 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class SpotifyPageableArtists extends SpotifyPaginatedEntity {
-    private List<SpotifyArtist> items;
+public class SpotifyPageableTracks extends SpotifyPaginatedEntity {
+    private List<SpotifyTrack> items;
 }

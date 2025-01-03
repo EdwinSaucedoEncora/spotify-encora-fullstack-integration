@@ -5,7 +5,6 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class Artist {
-    public List<String> genres;
-    
+public class SpotifyArtist extends SpotifyEntity{
+    private List<String> genres;
 }
