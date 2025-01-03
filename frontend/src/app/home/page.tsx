@@ -1,8 +1,17 @@
+"use client";
 import { Input } from "@/components/ui/input";
+import { useGetTopUserArtistsQuery, useSearchQuery } from "@/services/spotify";
 import Image from "next/image";
-import { HTMLAttributes, HTMLProps } from "react";
+import Link from "next/link";
+import { HTMLAttributes } from "react";
 
 export default function HomePage() {
+  const {
+    data: userTopArtists,
+    error,
+    isLoading,
+  } = useGetTopUserArtistsQuery(undefined);
+  const { data } = useSearchQuery("a");
   return (
     <section className="border w-full h-full flex flex-col bg-slate-100">
       <Input
@@ -10,44 +19,51 @@ export default function HomePage() {
         placeholder="Search by artist, song, etc..."
       />
       <main className="w-full max-w-full box-border *:box-border">
-        <MainSongsContainer title={"My top artists"} />
+        {!isLoading && (
+          <TopArtistContainer
+            title={"My top artists"}
+            items={userTopArtists?.items}
+          />
+        )}
         <h1 className="p-4 text-[2rem]">Search Results</h1>
-        <MainSongsContainer />
       </main>
     </section>
   );
 }
 
-interface MainSongsContainerProps {
+interface TopArtistContainerProps {
   title?: String;
+  items?: Array<any>;
 }
-function MainSongsContainer({
+
+function TopArtistContainer({
   title,
+  items,
   className,
-}: MainSongsContainerProps & HTMLAttributes<HTMLDivElement>) {
+}: TopArtistContainerProps & HTMLAttributes<HTMLDivElement>) {
+  console.log({ items });
   return (
     <section
       className={`*:w-full flex flex-col px-8 w-full gap-4 max-h-96 overflow-hidden ${className}`}
     >
       <h1 className=" text-slate-600">{title}</h1>
       <div className="grid border grid-cols-auto-fit-250 *:border  gap-4 p-8 rounded-lg overflow-auto">
-        {Array.from(Array(50).keys()).map((el) => {
+        {items?.map(({ id, name, genres, images }, el) => {
           return (
-            <div
-              className="relative max-w-64 min-w-64 flex shadow-sm bg-slate-50 rounded-md overflow-hidden min-h-24 max-h-24 last:justify-self-start"
-              key={el}
-            >
-              <Image
-                className="!relative object-cover aspect-square min-w-24 max-w-24 overflow-hidden"
-                src="/gunsnroses.jpg"
-                alt="Artist Image"
-                fill
-              />
-              <div className="w-fit px-4">
-                <h2>Artist name</h2>
-                <p>Genres</p>
+            <Link href={`/artist/${id}`} key={id ?? el}>
+              <div className="relative max-w-64 min-w-64 flex shadow-sm bg-slate-50 rounded-md overflow-hidden min-h-24 max-h-24 last:justify-self-start">
+                <Image
+                  className="!relative object-cover aspect-square min-w-24 max-w-24 overflow-hidden"
+                  src={images?.at(0)?.url}
+                  alt="Artist Image"
+                  fill
+                />
+                <div className="w-fit px-4">
+                  <h2>{name}</h2>
+                  <p className="text-xs"> {genres?.join(" ")}</p>
+                </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
