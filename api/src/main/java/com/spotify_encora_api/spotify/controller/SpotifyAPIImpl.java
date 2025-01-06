@@ -13,28 +13,34 @@ public class SpotifyAPIImpl implements SpotifyAPI {
     SpotifyAPIImpl(SpotifyAPIService apiService){
         this.apiService = apiService;
     }
+
     @Override
-    public ResponseEntity<SpotifySearch> search(@RequestParam String query, @RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh) {
+    public ResponseEntity<SpotifySearch> search(@RequestParam String query, @RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh) {
         return apiService.search(query, token, refresh);
     }
 
     @Override
-    public ResponseEntity<SpotifyPageableArtists> getUserTopArtists(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh) {
+    public ResponseEntity<SpotifyPageableArtists> getUserTopArtists(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh) {
         return apiService.getUserTopArtists(token, refresh);
     }
 
     @Override
-    public ResponseEntity<SpotifyArtist> getArtistById(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh, @PathVariable String id) {
+    public ResponseEntity<SpotifyArtistResponse> getArtistById(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh, @PathVariable String id) {
         return apiService.getArtistById(token, refresh, id);
     }
 
     @Override
-    public ResponseEntity<SpotifyArtistTopTracks> getArtistTopTracks(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh, @PathVariable String id) {
+    public ResponseEntity<SpotifyArtistTopTracks> getArtistTopTracks(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh, @PathVariable String id) {
         return apiService.getArtistTopTracks(token, refresh, id);
     }
 
     @Override
     public ResponseEntity<SpotifyPageableAlbums> getArtistAlbums(String token, String refresh, String id) {
         return apiService.getArtistAlbums(token, refresh, id);
+    }
+
+    @Override
+    public ResponseEntity<SpotifyAlbum> getAlbumById(String token, String refresh, String id) {
+        return apiService.getAlbumById(token, refresh, id);
     }
 }

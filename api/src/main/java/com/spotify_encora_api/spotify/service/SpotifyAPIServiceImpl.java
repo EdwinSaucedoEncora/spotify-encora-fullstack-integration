@@ -24,7 +24,11 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
         headers.set("Authorization", token);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         try {
-            return restTemplate.exchange("https://api.spotify.com/v1/search?q=" + query, HttpMethod.GET, entity, SpotifySearch.class);
+            ResponseEntity<SpotifySearch> response = restTemplate.exchange("https://api.spotify.com/v1/search?type=album,artist,track&q=" + query, HttpMethod.GET, entity, SpotifySearch.class);
+            HttpStatusCode code = response.getStatusCode();
+            if(code.is2xxSuccessful()){
+                return ResponseEntity.ok().headers(headers).body(response.getBody());
+            }
         }
         catch (Exception e)
         {
@@ -32,7 +36,11 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
                 String newToken = authService.getRefreshedToken(refresh);
                 headers.set("Authorization", newToken);
                 HttpEntity<String> newEntity = new HttpEntity<>(null, headers);
-                return restTemplate.exchange("https://api.spotify.com/v1/search?type=album,artist,track&q=" + query, HttpMethod.GET, entity, SpotifySearch.class);
+                ResponseEntity<SpotifySearch> response = restTemplate.exchange("https://api.spotify.com/v1/search?type=album,artist,track&q=" + query, HttpMethod.GET, entity, SpotifySearch.class);
+                HttpStatusCode code = response.getStatusCode();
+                if(code.is2xxSuccessful()){
+                    return ResponseEntity.ok().headers(headers).body(response.getBody());
+                }
             }
         }
         return null;
@@ -46,10 +54,19 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
             headers.set("Authorization", token);
             HttpEntity<SpotifyPageableArtists> entity = new HttpEntity<>(null, headers);
             try {
-                return restTemplate.exchange("https://api.spotify.com/v1/me/top/artists", HttpMethod.GET, entity, SpotifyPageableArtists.class);
+                ResponseEntity<SpotifyPageableArtists> response = restTemplate.exchange("https://api.spotify.com/v1/me/top/artists", HttpMethod.GET, entity, SpotifyPageableArtists.class);
+                HttpStatusCode code = response.getStatusCode();
+
+                if(code.is2xxSuccessful()) {
+                    return ResponseEntity.ok().headers(headers).body(response.getBody());
+                }
+                    throw new Exception(code.toString());
             }
             catch (Exception e)
             {
+                if(e.getMessage().contains("403")){
+                    return  new ResponseEntity<>(   null, HttpStatus.FORBIDDEN);
+                }
                 if(refresh == null){
                     return  new ResponseEntity<>(HttpStatus.FORBIDDEN);
                 }
@@ -58,22 +75,32 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
                 headers.set("Authorization", newToken);
                 HttpEntity<String> newEntity = new HttpEntity<>(null, headers);
                 ResponseEntity<SpotifyPageableArtists> response = restTemplate.exchange("https://api.spotify.com/v1/me/top/artists", HttpMethod.GET, entity, SpotifyPageableArtists.class);
-                MultiValueMap<String, String> responseHeaders = new LinkedMultiValueMap<>();
+                HttpHeaders responseHeaders = new HttpHeaders();
                 responseHeaders.add("Authorization", newToken);
-                return new ResponseEntity<SpotifyPageableArtists>(response.getBody(), responseHeaders, HttpStatus.OK);
+                return ResponseEntity.ok().headers(responseHeaders).body(response.getBody());
             }
         }
         return  new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     @Override
-    public ResponseEntity<SpotifyArtist> getArtistById(String token, String refresh, String id) {
+    public ResponseEntity<SpotifyArtistResponse> getArtistById(String token, String refresh, String id) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
         try {
-            return restTemplate.exchange("https://api.spotify.com/v1/artists/" + id, HttpMethod.GET, entity, SpotifyArtist.class);
+            ResponseEntity<SpotifyArtist> responseArtist = restTemplate.exchange("https://api.spotify.com/v1/artists/" + id, HttpMethod.GET, entity, SpotifyArtist.class);
+            ResponseEntity<SpotifyArtistTopTracks> responseTracks = getArtistTopTracks(token, refresh, id);
+            ResponseEntity<SpotifyPageableAlbums> responseAlbums = getArtistAlbums(token, refresh, id);
+            HttpStatusCode code = responseArtist.getStatusCode();
+            SpotifyArtistResponse response = new SpotifyArtistResponse();
+            response.setInfo(responseArtist.getBody());
+            response.setPopularSongs(responseTracks.getBody());
+            response.setDiscography(responseAlbums.getBody());
+            if(code.is2xxSuccessful()){
+                return ResponseEntity.ok().headers(headers).body(response);
+            }
         }
         catch (Exception e)
         {
@@ -81,8 +108,17 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
                 String newToken = authService.getRefreshedToken(refresh);
                 headers.set("Authorization", newToken);
                 HttpEntity<String> newEntity = new HttpEntity<>(null, headers);
-                return restTemplate.exchange("https://api.spotify.com/v1/artists/" + id, HttpMethod.GET, newEntity, SpotifyArtist.class);
-
+                ResponseEntity<SpotifyArtist> responseArtist = restTemplate.exchange("https://api.spotify.com/v1/artists/" + id, HttpMethod.GET, entity, SpotifyArtist.class);
+                ResponseEntity<SpotifyArtistTopTracks> responseTracks = getArtistTopTracks(token, refresh, id);
+                ResponseEntity<SpotifyPageableAlbums> responseAlbums = getArtistAlbums(token, refresh, id);
+                HttpStatusCode code = responseArtist.getStatusCode();
+                SpotifyArtistResponse response = new SpotifyArtistResponse();
+                response.setInfo(responseArtist.getBody());
+                response.setPopularSongs(responseTracks.getBody());
+                response.setDiscography(responseAlbums.getBody());
+                if(code.is2xxSuccessful()){
+                    return ResponseEntity.ok().headers(headers).body(response);
+                }
             }
         }
         return null;
@@ -103,7 +139,11 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
                 String newToken = authService.getRefreshedToken(refresh);
                 headers.set("Authorization", newToken);
                 HttpEntity<String> newEntity = new HttpEntity<>(null, headers);
-                return restTemplate.exchange("https://api.spotify.com/v1/artists/" + id + "/top-tracks", HttpMethod.GET, entity, SpotifyArtistTopTracks.class);
+                ResponseEntity<SpotifyArtistTopTracks> response = restTemplate.exchange("https://api.spotify.com/v1/artists/" + id + "/top-tracks", HttpMethod.GET, entity, SpotifyArtistTopTracks.class);
+                HttpStatusCode code = response.getStatusCode();
+                if(code.is2xxSuccessful()){
+                    return ResponseEntity.ok().headers(headers).body(response.getBody());
+                }
             }
         }
         return null;
@@ -114,7 +154,11 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
         headers.set("Authorization", token);
         HttpEntity<SpotifyPageableArtists> entity = new HttpEntity<>(null, headers);
         try {
-            return restTemplate.exchange("https://api.spotify.com/v1/artists/" + id + "/albums", HttpMethod.GET, entity, SpotifyPageableAlbums.class);
+            ResponseEntity<SpotifyPageableAlbums> response = restTemplate.exchange("https://api.spotify.com/v1/artists/" + id + "/albums", HttpMethod.GET, entity, SpotifyPageableAlbums.class);
+            HttpStatusCode code = response.getStatusCode();
+            if(code.is2xxSuccessful()){
+                return ResponseEntity.ok().headers(headers).body(response.getBody());
+            }
         }
         catch (Exception e)
         {
@@ -122,9 +166,43 @@ public class SpotifyAPIServiceImpl implements SpotifyAPIService {
                 String newToken = authService.getRefreshedToken(refresh);
                 headers.set("Authorization", newToken);
                 HttpEntity<String> newEntity = new HttpEntity<>(null, headers);
-                return restTemplate.exchange("https://api.spotify.com/v1/artists/" + id + "/albums", HttpMethod.GET, entity, SpotifyPageableAlbums.class);
+                ResponseEntity<SpotifyPageableAlbums> response = restTemplate.exchange("https://api.spotify.com/v1/artists/" + id + "/albums", HttpMethod.GET, entity, SpotifyPageableAlbums.class);
+                HttpStatusCode code = response.getStatusCode();
+                if(code.is2xxSuccessful()){
+                    return ResponseEntity.ok().headers(headers).body(response.getBody());
+                }
             }
         }
         return null;
     }
+
+    @Override
+    public ResponseEntity<SpotifyAlbum> getAlbumById(String token, String refresh, String id) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<SpotifyPageableArtists> entity = new HttpEntity<>(null, headers);
+        try {
+            ResponseEntity<SpotifyAlbum> response = restTemplate.exchange("https://api.spotify.com/v1/albums/" + id, HttpMethod.GET, entity, SpotifyAlbum.class);
+            HttpStatusCode code = response.getStatusCode();
+            if(code.is2xxSuccessful()){
+                return ResponseEntity.ok().headers(headers).body(response.getBody());
+            }
+        }
+        catch (Exception e)
+        {
+            if(refresh != null){
+                String newToken = authService.getRefreshedToken(refresh);
+                headers.set("Authorization", newToken);
+                HttpEntity<String> newEntity = new HttpEntity<>(null, headers);
+                ResponseEntity<SpotifyAlbum> response = restTemplate.exchange("https://api.spotify.com/v1/albums/" + id, HttpMethod.GET, entity, SpotifyAlbum.class);
+                HttpStatusCode code = response.getStatusCode();
+                if(code.is2xxSuccessful()){
+                    return ResponseEntity.ok().headers(headers).body(response.getBody());
+                }
+            }
+        }
+        return null;
+    }
+
 }

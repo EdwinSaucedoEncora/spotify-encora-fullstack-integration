@@ -7,17 +7,19 @@ import org.springframework.web.bind.annotation.*;
 public interface SpotifyAPI {
 
     @GetMapping("/search")
-    public ResponseEntity<SpotifySearch> search(@RequestParam String query, @RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh);
+    public ResponseEntity<SpotifySearch> search(@RequestParam String query, @RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh);
 
     @GetMapping("/me/top/artists")
-    public ResponseEntity<SpotifyPageableArtists> getUserTopArtists(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh);
+    public ResponseEntity<SpotifyPageableArtists> getUserTopArtists(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh);
 
     @GetMapping("/artists/{id}")
-    public ResponseEntity<SpotifyArtist> getArtistById(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh, @PathVariable String id);
+    public ResponseEntity<SpotifyArtistResponse> getArtistById(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh, @PathVariable String id);
 
     @GetMapping("/artists/{id}/top-tracks")
-    public  ResponseEntity<SpotifyArtistTopTracks> getArtistTopTracks(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh, @PathVariable String id);
+    public  ResponseEntity<SpotifyArtistTopTracks> getArtistTopTracks(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh, @PathVariable String id);
 
     @GetMapping("/artists/{id}/albums")
-    public  ResponseEntity<SpotifyPageableAlbums> getArtistAlbums(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "Refresh") String refresh, @PathVariable String id);
+    public  ResponseEntity<SpotifyPageableAlbums> getArtistAlbums(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh, @PathVariable String id);
+    @GetMapping("/albums/{id}")
+    public  ResponseEntity<SpotifyAlbum> getAlbumById(@RequestHeader(name = "Authorization") String token, @RequestHeader(name = "X-Refresh") String refresh, @PathVariable String id);
 }
