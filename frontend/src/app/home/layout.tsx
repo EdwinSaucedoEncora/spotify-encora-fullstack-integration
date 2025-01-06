@@ -14,8 +14,8 @@ export default function HomeLayout({
   return (
     <>
       {children}
-      <section className="fixed h-16 w-full bottom-0 z-10 bg-slate-300 grid place-items-center p-2">
-        <div className="flex  gap-4 *:stroke-slate-500 *:size-6 items-center justify-center *:cursor-pointer *:hover:*:opacity-65">
+      <section className="fixed h-16 w-full bottom-0 z-10 bg-slate-800 grid place-items-center p-2">
+        <div className="flex  gap-4 *:stroke-slate-100 *:size-6 items-center justify-center *:cursor-pointer *:hover:*:opacity-65">
           <IconArrowsShuffle />
           <IconPlayerTrackPrev />
           <IconPlayerPlay className="!size-10" />
