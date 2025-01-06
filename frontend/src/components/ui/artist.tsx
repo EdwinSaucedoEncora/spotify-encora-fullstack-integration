@@ -11,7 +11,7 @@ export const ArtistDescription = ({
 }) => {
   return (
     <div className="flex flex-col justify-around p-4 h-full">
-      <Link href={`/artist/${id}`}>
+      <Link href={`/artists/${id}`}>
         <h1 className="font-bold">{name}</h1>
       </Link>
       <h2 className="font-light">About {name}</h2>

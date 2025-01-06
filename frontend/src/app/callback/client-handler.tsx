@@ -1,12 +1,15 @@
 "use client";
 
+import { setToken } from "@/lib/authSlice";
+import { useAppDispatch, useAppStore } from "@/lib/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
 
 function Callback() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
+  const store = useAppStore();
+  const dispatch = useAppDispatch();
   useEffect(() => {
     const {
       page = "/home",
@@ -16,14 +19,13 @@ function Callback() {
       expires_in = 0,
     } = Object.fromEntries(searchParams.entries());
 
-    console.log({ refresh_token, access_token, expires_in });
-
     const hasProps = [refresh_token, access_token, state, expires_in].every(
       (val) => Boolean(val)
     );
 
     const session = localStorage.getItem("session");
     const today = new Date();
+    dispatch(setToken(access_token));
 
     if (session?.length) {
       const parsedSession = JSON.parse(session);
