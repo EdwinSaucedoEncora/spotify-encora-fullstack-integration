@@ -12,16 +12,16 @@ const baseQueryWithHeaders = async (args: any, api: any, extraOptions: any) => {
       const state = getState() as RootState;
       const session = JSON.parse(localStorage.getItem("session") ?? "");
       const { access_token, refresh_token, expires_at } = session;
-
       const expiresAt = new Date(expires_at);
       const isExpired = expiresAt <= new Date();
-      headers.set("credentials", "include");
-      headers.set("Accept", "*/*");
-      headers.set("Connection", "keep/alive");
-      headers.set("Accept-Encoding", "gzip, deflate, br");
-      if (access_token && !isExpired) {
+      headers.delete("Access-Control-Allow-Credentials");
+      // headers.set("credentials", "include");
+      // headers.set("Accept", "*/*");
+      // headers.set("Connection", "keep/alive");
+      // headers.set("Accept-Encoding", "gzip, deflate, br");
+      if (access_token) {
         headers.set("Authorization", `Bearer ${access_token}`);
-        headers.set("Refresh", refresh_token);
+        headers.set("X-Refresh", refresh_token);
       }
 
       return headers;
@@ -73,8 +73,11 @@ export const spotifyApi = createApi({
         return null;
       },
     }),
-    getAlbumTracks: builder.query({
-      query: (id) => `albums/${id}`,
+    getAlbumById: builder.query({
+      query: (id) => ({
+        url: `albums/${id}`,
+        method: "GET",
+      }),
     }),
   }),
 });
@@ -82,8 +85,8 @@ export const spotifyApi = createApi({
 export const {
   useSearchQuery,
   useLazySearchQuery,
-  useGetAlbumTracksQuery,
-  useLazyGetAlbumTracksQuery,
+  useGetAlbumByIdQuery,
+  useLazyGetAlbumByIdQuery,
   useLazyGetTopUserArtistsQuery,
   useGetTopUserArtistsQuery,
   useGetArtistQuery,

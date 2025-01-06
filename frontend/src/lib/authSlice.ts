@@ -14,9 +14,7 @@ export const AuthSlice = createSlice({
   initialState: { token: undefined } as AuthState,
   reducers: {
     setToken: (state, action: PayloadAction<string | undefined>) => {
-      console.log({ action, state: state.token });
       state.token = action.payload ?? state.token;
-      console.log({ token: state.token });
     },
     setExpiresAt: (state, action: PayloadAction<string | undefined>) => {
       state.expiresAt = action.payload ?? state.expiresAt;
