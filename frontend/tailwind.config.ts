@@ -68,6 +68,9 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
+    plugin(function ({ addVariant }) {
+      addVariant("aria-checked", '&[aria-checked="true"]');
+    }),
     plugin(({ addBase, config }) => {
       addBase({
         h1: { fontSize: config("theme.fontSize.2xl") },
