@@ -7,4 +7,6 @@ import java.util.List;
 @Data
 public class SpotifyArtist extends SpotifyEntity{
     private List<String> genres;
+    private Integer popularity;
+    private String type;
 }
